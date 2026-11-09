@@ -1,0 +1,7 @@
+interface:
+  display_name: "KK独家漫剧"
+  short_description: "按独立镜头设计与提示词规范，编排素材、并发生成、连续性审查及成片交付"
+  default_prompt: "使用 $kk-manju 按当前剧本与授权范围推进漫剧制作，先设计分镜，再编写提示词并安排可并发任务。"
+
+policy:
+  allow_implicit_invocation: true

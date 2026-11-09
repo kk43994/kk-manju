@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+dist/
+backups/
+*.sqlite3*
+pairing-token
+install-receipt.json
+test-results/

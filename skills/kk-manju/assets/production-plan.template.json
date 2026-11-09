@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "project_id": "replace-with-project-id",
+  "revision": "r1",
+  "authorized_kinds": [],
+  "limits": {
+    "total": 1,
+    "by_kind": {}
+  },
+  "dialogue_source": {},
+  "jobs": [],
+  "notes": "模板没有可执行任务。按真实项目填写任务、授权范围与当前并发额度；单镜和生成时长均由本次设计决定。"
+}

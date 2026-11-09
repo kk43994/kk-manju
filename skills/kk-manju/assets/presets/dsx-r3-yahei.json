@@ -1,0 +1,15 @@
+{
+  "preset_id": "dsx-r3-yahei-v1",
+  "scope": "大师兄 EP001 R3 已认可字幕外观；其他项目按需选择",
+  "subtitle": {
+    "font": "Microsoft YaHei",
+    "font_file": "/Applications/Microsoft Word.app/Contents/Resources/DFonts/msyh.ttc",
+    "font_size_at_480p": 27,
+    "bottom_margin_at_480p": 30,
+    "alignment": "bottom_center",
+    "punctuation": false
+  },
+  "renderer": "subtitle_layer.py",
+  "renderer_behavior": "白色单行，居中；4倍采样后缩小；细暗边和轻阴影；不改写对白时间；复制并校验音频包",
+  "reference_output_sha256": "2754b43a18dbf3a984af08dfe47d91b648837b6e27153312bb678532914d025d"
+}

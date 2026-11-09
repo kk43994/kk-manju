@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 116" role="img" aria-label="KK DIRECTOR">
+ <title>KK DIRECTOR · Frame K</title>
+ <rect width="140" height="116" rx="18" fill="#10100e"/>
+ <g fill="#e9dcc0">
+  <path fill-rule="evenodd" d="M27 17H61L43 37V49L80 7H111L61 65L94 109H64L43 83V99H27Q13 99 13 85V31Q13 17 27 17ZM23 33V43H33V33ZM23 73V83H33V73Z"/>
+  <path fill-rule="evenodd" d="M108 17H114Q128 17 128 31V85Q128 99 114 99H105L79 65ZM108 33V43H118V33ZM108 73V83H118V73Z"/>
+ </g>
+</svg>
