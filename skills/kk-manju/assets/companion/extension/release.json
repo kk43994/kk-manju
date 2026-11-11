@@ -1,21 +1,21 @@
 {
-  "buildId": "c22cdad5c0a3cdea1e646506a27b60bdb69415d742f4fdb5feb062bf60f070b6",
+  "buildId": "f26268104e746fcca449b808281da42da6271f19070a7e07a9a6ea6ab96c3171",
   "files": {
     "adapter.js": "82eedce2c7ba8ea82b66d4b067ada5c2125bfdf84b8a51d0a3e3cb1f65d1525a",
     "background.js": "4f471f05877c46a088c69c09216651ce0b699809d45820b5c4b4af5895a320b3",
-    "build-info.js": "8f29ca212203891e754a4808c5545e553c9ff3b3bdd59102a367a5f7d1307b5a",
+    "build-info.js": "f6b5998a55bcad70642f088d09017626539fa97666705db7279332a3d0c3c08e",
     "content.js": "8d5f4d6aa082f013a8a1d91f6ce883416bb1a62ba211699e97bcd44fc7025bed",
     "logo.svg": "62866ca67b743b740d6ef6e60dc869e44d7460b55b6cabb04e7afbf04ce78e6f",
-    "manifest.json": "28d208f93e1011840384cc1874abbfaf850b93126282cc7260da71ad766ac154",
+    "manifest.json": "1880f24a8754cc68fae70161f89a1faeb4b05d4ff7ba9a39265f13ba94daf1ef",
     "options.css": "407c5e3a9c6efe0ab87230c8fc2ae293ac312c2a398440a9040d15e964e44fc4",
     "options.html": "aa7a36f3cbf73f7026dfd5847732cdb10c0ca8e93736ae1ace724a2649191be4",
     "options.js": "d9a339532f1088deaec16ba9a58d5a00446c4643383c251ee01e1aa7550ea848",
-    "production.css": "cb1f7ada8664960d99a608d1b8c6824f773fe231ab5e502f5ae8f63bcf3ebbd6",
-    "production.html": "22314953b757cd3223d3e3a78f47902a9d1f4bd08b730d5c11741e56f77de5e1",
-    "production.js": "58fe3591f31acdb418c98f9bb7cd2812ca57acf763dc166c1864eede8343ab07",
+    "production.css": "95dfe9c5fa3ad01f36b49118b79fffe634ee931d9afe2bcbbd4e0b7344df0ecb",
+    "production.html": "7142df700b0e12149182563de35e902e0a343cb2ce3157bddad3a763cca8602b",
+    "production.js": "b17b840854932578505897e7e817d028282d11f92e3c10a17b4f881cc38211c7",
     "updater.js": "a83de208bb66e59d5b8c4fa8402f9d635119e3c146ea2a75a58946fa1cdd67bc"
   },
-  "publishedAt": "2026-11-08T20:35:53.371647+00:00",
+  "publishedAt": "2026-11-09T21:45:18.812703+00:00",
   "schema": 1,
-  "version": "0.6.0"
+  "version": "0.8.1"
 }

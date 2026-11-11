@@ -72,17 +72,23 @@ class CodexBridge:
             self.process=subprocess.Popen([executable,'app-server','--listen','stdio://'],cwd=self.cwd,
                 stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,text=True,bufsize=1)
             threading.Thread(target=self._reader,args=(self.process,),daemon=True).start()
-            self._rpc('initialize',{'clientInfo':{'name':'kk_manju_companion','title':'KK 漫剧制作面板','version':'0.6.0'},'capabilities':{'experimentalApi':True}})
+            self._rpc('initialize',{'clientInfo':{'name':'kk_manju_companion','title':'KK 漫剧制作面板','version':'0.7.0'},'capabilities':{'experimentalApi':True}})
             self._write({'method':'initialized'})
             account=self._rpc('account/read',{'refreshToken':False})
             if not account.get('account'):raise RuntimeError('本地 Codex 尚未登录')
             self.status['codex']='connected'
             result=self._rpc('thread/start',{'ephemeral':True,'cwd':self.cwd})
             self.thread_id=result['thread']['id']
-            inventory=self._rpc('mcpServerStatus/list',{'threadId':self.thread_id,'detail':'toolsAndAuthOnly','limit':100})
-            matches=[s for s in inventory.get('data',[]) if s.get('name')=='libtv']
+            # App Server may return a server before its MCP tools finish loading.
+            # Recheck the same transport context instead of destroying startup
+            # and beginning an identical, potentially incomplete handshake again.
+            for attempt in range(3):
+                inventory=self._rpc('mcpServerStatus/list',{'threadId':self.thread_id,'detail':'toolsAndAuthOnly','limit':100})
+                matches=[s for s in inventory.get('data',[]) if s.get('name')=='libtv']
+                if matches and READ_TOOLS.issubset(set(matches[0].get('tools',{}))):break
+                if attempt<2:time.sleep(.5)
             if not matches:raise RuntimeError('本地 Codex 未启用 LibTV 插件')
-            if not READ_TOOLS.issubset(set(matches[0].get('tools',{}))):raise RuntimeError('LibTV 读取接口不完整，请更新官方插件')
+            if not READ_TOOLS.issubset(set(matches[0].get('tools',{}))):raise RuntimeError('LibTV 读取工具暂未就绪，后台将重试；持续出现时请检查官方插件')
             self.server=matches[0]['name'];self.status['codex']='connected'
 
     def call(self, tool, arguments):

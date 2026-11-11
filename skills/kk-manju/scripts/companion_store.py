@@ -11,8 +11,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 
-VERSION = '0.6.0'
+VERSION = '0.8.1'
 SCRIPTS = {
+    'cut_audit': ('短镜与闪帧定位', '检查源素材内部切镜和剪辑残片，结果需逐帧审查，不能自动判坏', False),
+    'capcut_jobs': ('CapCut 制作上下文', '本地登记已确认剧本、剪辑单和校对字幕，不从网页接受路径', False),
+    'capcut_edit': ('CapCut 分轨工程', '按明确采用版本构建画面、声音和无描边字幕，另建网页草稿并回读', False),
     'production_index': ('集数目录同步', '读取已登记制作目录与平台快照，不生成、不修改制作计划', False),
     'production_flow': ('制作闭环同步', '连接真实生成、检查、审核和返修记录，不代替创作者采用', False),
     'preserve_audio': ('恢复原声音轨', '同长视频原画面与原声包合并，校验指纹且保留原件', False),
@@ -31,7 +34,7 @@ SCRIPTS = {
     'subtitle_layer': ('独立字幕层', '已校对台词、字体、原声包校验', True),
     'picture_coverage': ('补镜覆盖', '等长换画面，保留音轨', False),
     'image_compare': ('图片对比', '等宽预览与原件指纹', True),
-    'delivery_save': ('交付保存', '原件保存、哈希及解码检查', False),
+    'delivery_save': ('交付保存', '原件保存、哈希及解码检查', True),
     'upload_parts': ('上传分片', '沿用既有票据及恢复身份', False),
 }
 

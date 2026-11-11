@@ -2,9 +2,9 @@
 
 KK 漫剧 Skill 与 LibTV 浏览器制作面板。按剧本组织导演设计、图片资产、视频提示词、依赖调度、检查返修与剪辑交付，保留真实任务回执、素材版本和人工采用。
 
-本次版本：**Skill 1.5.1 / 浏览器扩展与伴随面板 0.6.0**。
+本次版本：**Skill 1.8.0 / 浏览器扩展与伴随面板 0.8.1**。
 
-[完整 Skill 安装包（内含扩展）](https://github.com/kk43994/kk-manju/releases/download/v1.5.1/KK-Manju-Skill-1.5.1.zip) · [浏览器扩展单独下载](https://github.com/kk43994/kk-manju/releases/download/v1.5.1/KK-Manju-Browser-0.6.0.zip) · [所有发布版本](https://github.com/kk43994/kk-manju/releases) · [SHA-256 校验清单](https://github.com/kk43994/kk-manju/releases/download/v1.5.1/SHA256SUMS.txt)
+[完整 Skill 安装包（内含扩展）](https://github.com/kk43994/kk-manju/releases/download/v1.8.0/KK-Manju-Skill-1.8.0.zip) · [浏览器扩展单独下载](https://github.com/kk43994/kk-manju/releases/download/v1.8.0/KK-Manju-Browser-0.8.1.zip) · [所有发布版本](https://github.com/kk43994/kk-manju/releases) · [SHA-256 校验清单](https://github.com/kk43994/kk-manju/releases/download/v1.8.0/SHA256SUMS.txt)
 
 ## 首次安装
 

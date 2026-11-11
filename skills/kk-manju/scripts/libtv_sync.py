@@ -5,6 +5,8 @@ from codex_bridge import CodexBridge
 from companion_store import identifier,clean
 
 DIRECTORY_CACHE_SECONDS=300
+ACTIVE_SYNC_SECONDS=30
+BACKGROUND_SYNC_SECONDS=300
 ASSET_DETAIL_CACHE_SECONDS=86400
 
 
@@ -26,6 +28,8 @@ class SyncService:
         self.media_lock=threading.Semaphore(3)
         self.cache_locks=[threading.Lock() for _ in range(64)]
         self.check_lock=threading.Lock()
+        self.auto_stop=threading.Event();self.auto_thread=None;self.worker=None
+        self.focus={};self.focus_lock=threading.Lock();self.auto_error=None
 
     def account(self):
         with self.store.connect() as c:
@@ -37,10 +41,64 @@ class SyncService:
         with self.store.connect() as c:c.execute('INSERT OR REPLACE INTO libtv_sync_settings VALUES(?,?)',('account',account))
         return account
 
-    def ensure_auto(self,project):
+    def watch(self,project):
+        with self.focus_lock:self.focus[identifier(project)]=time.time()
+
+    def due(self,project,interval=ACTIVE_SYNC_SECONDS):
         with self.store.connect() as c:
-            latest=c.execute('SELECT status,started FROM libtv_sync_runs WHERE project=? ORDER BY started DESC LIMIT 1',(project,)).fetchone()
-        if not latest or (latest['status']!='running' and time.time()-latest['started']>=30):self.start(project)
+            rows=c.execute('SELECT status,started,ended FROM libtv_sync_runs WHERE project=? ORDER BY started DESC LIMIT 6',(project,)).fetchall()
+        if not rows:return True
+        if rows[0]['status']=='running':return False
+        failures=0
+        for row in rows:
+            if row['status'] not in ('failed','interrupted'):break
+            failures+=1
+        delay=max(interval,min(900,ACTIVE_SYNC_SECONDS*2**failures)) if failures else interval
+        return time.time()-(rows[0]['ended'] or rows[0]['started'])>=delay
+
+    def ensure_auto(self,project):
+        self.watch(project)
+        if self.due(project):return self.start(project)
+
+    def auto_tick(self):
+        # Browser heartbeats, local production and previously opened projects all
+        # persist independently of the panel. Never enumerate all account canvases.
+        import production_index
+        now=time.time()
+        with self.focus_lock:
+            self.focus={p:t for p,t in self.focus.items() if now-t<90}
+            active=set(self.focus)
+        with self.store.connect() as c:
+            known={r['id'] for r in c.execute('SELECT id FROM projects')}
+            active.update(r['project'] for r in c.execute('SELECT project FROM contexts WHERE updated>?',(now-45,)))
+            active.update(r['project'] for r in c.execute("SELECT project FROM runs WHERE status='running' AND heartbeat>?",(now-30,)))
+            if c.execute("SELECT 1 FROM sqlite_master WHERE name='production_sources'").fetchone():
+                known.update(r['project'] for r in c.execute('SELECT project FROM production_sources'))
+            if c.execute("SELECT 1 FROM sqlite_master WHERE name='production_catalog'").fetchone():
+                known.update(r['project'] for r in c.execute('SELECT project FROM production_catalog'))
+            known.update(r['project'] for r in c.execute('SELECT project FROM libtv_snapshots WHERE account=?',(self.account(),)))
+            attempts={r['project']:r['attempt'] for r in c.execute('SELECT project,MAX(started) AS attempt FROM libtv_sync_runs GROUP BY project')}
+        known.update(active)
+        for project in known:production_index.refresh(self.store,project)
+        if self.lock.locked():return
+        # Oldest due work first: active tabs cannot starve background projects.
+        pending=[p for p in known if self.due(p,ACTIVE_SYNC_SECONDS if p in active else BACKGROUND_SYNC_SECONDS)]
+        if pending:return self.start(min(pending,key=lambda p:attempts.get(p,0)))
+
+    def start_auto(self):
+        if self.auto_thread and self.auto_thread.is_alive():return
+        self.auto_stop.clear()
+        def loop():
+            while not self.auto_stop.is_set():
+                try:self.auto_tick();self.auto_error=None
+                except Exception as e:self.auto_error=clean(str(e))[:300]
+                self.auto_stop.wait(5)
+        self.auto_thread=threading.Thread(target=loop,daemon=True);self.auto_thread.start()
+
+    def close(self):
+        self.auto_stop.set()
+        if self.auto_thread:self.auto_thread.join(timeout=6)
+        self.bridge.close()
 
     def connections(self,project,force=False,auto=False):
         if auto:self.ensure_auto(project)
@@ -62,7 +120,9 @@ class SyncService:
                 'codex':{'status':status['codex'] if fresh and not force else 'connecting'},
                 'libtv':{'status':status['libtv'] if fresh and not force else 'connecting'},'error':status.get('error'),
                 'sync':dict(latest) if latest else None,'lastSuccess':last['updated'] if last else None,
-                'transport':'codex_app_server_official_mcp','automaticExecution':False}
+                'transport':'codex_app_server_official_mcp','automaticExecution':False,'autoSync':{'enabled':bool(self.auto_thread and self.auto_thread.is_alive()),
+                'activeSeconds':ACTIVE_SYNC_SECONDS,'backgroundSeconds':BACKGROUND_SYNC_SECONDS,
+                'directorySeconds':DIRECTORY_CACHE_SECONDS,'error':self.auto_error}}
 
     def start(self,project,full=False):
         project=identifier(project)
@@ -70,7 +130,7 @@ class SyncService:
             return {'status':'running','message':'已有同步进行中，请等待当前同步完成'}
         key='sync-'+__import__('uuid').uuid4().hex
         with self.store.connect() as c:c.execute('INSERT INTO libtv_sync_runs VALUES(?,?,?,?,?,?,?)',(key,project,'running','正在连接 Codex 与 LibTV',None,time.time(),None))
-        threading.Thread(target=self._run,args=(key,project,full),daemon=True).start()
+        self.worker=threading.Thread(target=self._run,args=(key,project,full),daemon=True);self.worker.start()
         return {'id':key,'status':'running'}
 
     def phase(self,key,text):
@@ -159,6 +219,8 @@ class SyncService:
                 c.execute('INSERT OR REPLACE INTO libtv_library VALUES(?,?,?)',(account,json.dumps(library,ensure_ascii=False),now))
                 c.execute('INSERT OR REPLACE INTO libtv_snapshots VALUES(?,?,?,?)',(account,project,json.dumps(snapshot,ensure_ascii=False),now))
                 c.execute("UPDATE libtv_sync_runs SET status='completed',phase=?,ended=? WHERE id=?",(f"{stats['elapsedSeconds']:g} 秒 · 画布 {len(media)} 项 · 资产复用 {reused} / 更新 {refreshed}",now,key))
+            import production_index
+            production_index.refresh(self.store,project)
             self.store.event(project,'sync',f'LibTV 同步完成：{len(projects)} 个项目、当前画布 {len(media)} 项、{len(assets)} 个个人资产')
         except Exception as e:
             with self.store.connect() as c:c.execute("UPDATE libtv_sync_runs SET status='failed',error=?,ended=? WHERE id=?",(clean(str(e))[:500],time.time(),key))

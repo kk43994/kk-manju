@@ -15,14 +15,56 @@ def init(store):
 def register(store,project,root,inherit=None):
     init(store);root=Path(root).resolve()
     if not root.is_dir():raise ValueError('制作目录不存在')
-    config={'root':str(root),'inherit':inherit or []}
-    with store.connect() as c:c.execute('INSERT OR REPLACE INTO production_sources VALUES(?,?)',(identifier(project),json.dumps(config,ensure_ascii=False)))
+    with store.connect() as c:
+        old=c.execute('SELECT config FROM production_sources WHERE project=?',(identifier(project),)).fetchone()
+        config=json.loads(old['config']) if old else {}
+        config.update(root=str(root),inherit=inherit if inherit is not None else config.get('inherit',[]))
+        c.execute('INSERT OR REPLACE INTO production_sources VALUES(?,?)',(project,json.dumps(config,ensure_ascii=False)))
     return config
 
-def scope(text):
+def register_plan(store,project,path,state=None):
+    """Trusted local runner hook: exact files only, never widen to a parent tree."""
+    project=identifier(project);path=Path(path).expanduser().resolve()
+    plan=json.loads(path.read_text())
+    if plan.get('project_id')!=project:raise ValueError('制作计划与运行项目不匹配')
+    init(store)
+    with store.connect() as c:
+        c.execute('BEGIN IMMEDIATE')
+        row=c.execute('SELECT config FROM production_sources WHERE project=?',(project,)).fetchone()
+        config=json.loads(row['config']) if row else {}
+        plans={p['path']:p for p in config.get('plans',[])}
+        entry=plans.get(str(path),{'path':str(path)})
+        if state:entry['state']=str(Path(state).expanduser().resolve())
+        plans[str(path)]=entry;config['plans']=list(plans.values())
+        c.execute('INSERT OR REPLACE INTO production_sources VALUES(?,?)',(project,json.dumps(config,ensure_ascii=False)))
+
+def episode_id(text):
     ep=re.search(r'(?<![A-Za-z0-9])EP0*(\d+)(?!\d)',text,re.I)
+    if ep:return f'EP{int(ep[1]):03d}'
+    ep=re.search(r'第\s*(\d+|[零〇一二两三四五六七八九十百]+)\s*集',text)
+    if ep:
+        value=ep[1]
+        if value.isdigit():n=int(value)
+        else:
+            digits={'零':0,'〇':0,'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};n=0;digit=0
+            for char in value:
+                if char in ('十','百'):n+=(digit or 1)*({'十':10,'百':100}[char]);digit=0
+                else:digit=digits[char]
+            n+=digit
+        return f'EP{n:03d}' if n>0 else None
+    ep=re.search(r'(?<![A-Za-z0-9])E(\d+)V\d+',text,re.I)
+    return f'EP{int(ep[1]):03d}' if ep else None
+
+def scope(text,context=''):
+    ep=episode_id(text);parent=episode_id(context)
+    if ep and parent and ep!=parent:context=''
+    ep=ep or parent
     version=re.search(r'(?:^|[\s｜|·-])V(\d+)(?!\d)',text,re.I)
-    return (f'EP{int(ep[1]):03d}',f'V{int(version[1])}') if ep and version else None
+    # A bare V05 node label is a shot when the group supplies its version.
+    group_version=re.search(r'(?:^|[\s｜|·-])V(\d+)(?!\d)',context,re.I)
+    if not re.search(r'EP\d+|第.+集|E\d+V',text,re.I):version=group_version
+    version=version or group_version
+    return (ep,f'V{int(version[1])}') if ep and version else None
 
 def shot_id(text,episode):
     m=re.search(r'(?<![A-Za-z0-9])E(\d+)V(\d+)(?!\d)',text,re.I)
@@ -45,16 +87,23 @@ def remote_candidate(m,account):
         'source':'libtv_index','taskId':m.get('taskId'),
         'createdAt':number(str(m.get('taskId',''))[:14]) or number(m.get('updatedAt'))}
 
+def plan_paths(config):
+    paths={}
+    if not config:return paths
+    if config.get('root'):
+        root=Path(config['root']).resolve()
+        paths={p.resolve():None for p in root.rglob('plan.json') if p.resolve().is_relative_to(root)}
+    paths.update({Path(p['path']).resolve():Path(p['state']).resolve() if p.get('state') else None for p in config.get('plans',[])})
+    return paths
+
 def plan_data(config,project):
     jobs=[];reviews={};errors=[]
-    if not config:return jobs,reviews,errors
-    root=Path(config['root'])
-    for path in sorted(root.rglob('plan.json')):
-        if not path.resolve().is_relative_to(root):continue
+    paths=plan_paths(config)
+    for path,registered_state in sorted(paths.items()):
         try:
             plan=json.loads(path.read_text());where=scope(plan.get('revision',''))
             if plan.get('project_id')!=project or not where:continue
-            statepath=next((p for p in (path.with_name('production-state.json'),path.with_name('state.json')) if p.is_file()),None)
+            statepath=registered_state or next((p for p in (path.with_name('production-state.json'),path.with_name('state.json')) if p.is_file()),None)
             state=json.loads(statepath.read_text()) if statepath else {}
             if state and (state.get('project_id')!=project or state.get('revision')!=plan['revision']):
                 errors.append('某份制作计划与状态不匹配，已保留原记录');continue
@@ -114,10 +163,10 @@ def refresh(store,project):
                 if shot.get('source')=='production_index':shot['jobStatus']=status;shot['activeTaskId']=task
             for media in graph.get('media',[]):
                 if media.get('type')!='video':continue
-                where=scope(media.get('name','')) or scope(media.get('group',''))
+                where=scope(media.get('name',''),media.get('group',''))
                 if not where:continue
                 # Only the explicit shot token is read; prompts/references never determine ownership.
-                label=media['name'];sid=shot_id(re.sub(r'\bEP\d+[｜|\s-]+V\d+(?:-R\d+)?','',label,flags=re.I),where[0])
+                label=media['name'];sid=shot_id(re.sub(r'(?:\bEP\d+|第\s*[\d零〇一二两三四五六七八九十百]+\s*集)[｜|\s-]+V\d+(?:-R\d+)?','',label,flags=re.I),where[0])
                 if not sid:continue
                 shot=ensure(where,sid)
                 candidate=remote_candidate(media,account['value'])

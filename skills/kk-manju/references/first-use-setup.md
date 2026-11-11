@@ -1,8 +1,8 @@
 # 首次安装与连接
 
-发布入口：[KK 漫剧 GitHub 仓库](https://github.com/kk43994/kk-manju)与[版本下载页](https://github.com/kk43994/kk-manju/releases)。当前完整包为 [Skill 1.5.1（内含浏览器扩展）](https://github.com/kk43994/kk-manju/releases/download/v1.5.1/KK-Manju-Skill-1.5.1.zip)，另提供[浏览器扩展 0.6.0 单独下载](https://github.com/kk43994/kk-manju/releases/download/v1.5.1/KK-Manju-Browser-0.6.0.zip)。单独的浏览器扩展仍需完整 Skill 的本机服务。
+完整 Skill 从 [KK 漫剧版本下载页](https://github.com/kk43994/kk-manju/releases)获取。浏览器扩展与配套服务使用[官方下载页](https://kk666.best/asset-lab/#browser-extension)上的 **0.9.0 自动更新版**：[完整配套包](https://kk666.best/asset-lab/downloads/KK-Manju-Companion-0.9.0.zip)、[独立扩展](https://kk666.best/asset-lab/downloads/KK-Manju-Browser-0.9.0.zip)、[安装说明](https://kk666.best/asset-lab/browser-extension.html)。独立扩展仍需配套本机服务。已安装云端自动更新入口时，检查实际当前版本，不用旧文档中的固定 ZIP 覆盖新程序。
 
-首次调用 KK 漫剧 Skill 时先完成本页引导。已安装者检查当前状态，只补缺项；更新 Skill 后不要求重复登录和配对。安装命令由助手在已获授权的环境执行，浏览器加载扩展和账户授权需要使用者在界面完成时，提供准确步骤。Skill 文件没有安装钩子，不能声称“下载后已自动装好插件”。
+用户交来剧本时先按[剧本接收与决策引导](guided-production.md)读取内容、整理已知选择和制作建议，在进入依赖平台的实际制作前完成本页引导；仅整理剧本或讨论流程不要求先安装。用户专门要求安装时直接处理本页。已安装者检查当前状态，只补缺项；更新 Skill 后不要求重复登录和配对。安装命令由助手在已获授权的环境执行，浏览器加载扩展和账户授权需要使用者在界面完成时，提供准确步骤。Skill 文件没有安装钩子，不能声称“下载后已自动装好插件”。
 
 ## 需要安装的两项
 
@@ -11,7 +11,7 @@
 | KK 漫剧浏览器扩展 | Chrome；其他 Chromium 浏览器须单独验证 | LibTV 网页里的制作面板、看片比较、问题与本地采用记录，以及当前画布上下文 |
 | LibTV 官方插件 `libtv@libtv` | Codex | 使用本人 LibTV OAuth 授权读取项目和资产，提供当前平台允许的制作工具 |
 
-当前随包浏览器扩展及本机服务为 `0.6.0`。检查包内 `manifest.json` 和实际连接状态，不把文档版本当作已经加载的版本。浏览器扩展不是 LibTV 官方插件；安装任意一项均不代表另一项就绪。
+当前公开自动更新版为 `0.9.0`。检查包内 `manifest.json`、服务健康状态、`cloudUpdate` 和近期扩展心跳，不把文档版本当作已经加载的版本。浏览器扩展不是 LibTV 官方插件；安装任意一项均不代表另一项就绪。
 
 ## 1. 安装并授权 LibTV 官方插件
 
@@ -39,14 +39,15 @@ codex plugin add libtv@libtv
 
 完整 KK 漫剧 Skill 内含扩展，目录为 `assets/companion/extension/`。发布包必须含 `manifest.json`、`build-info.js`、脚本、页面及 `release.json`；不能让新用户使用作者电脑的桌面路径。若下载包缺少这些文件，获取包含扩展的完整发布包再继续，不把缺包报告为已安装。
 
-以下命令在实际安装的 `kk-manju` Skill 目录执行；自定义安装位置以真实位置为准：
+首次启用云端自动更新时，下载并解压上方完整配套包，在该包目录执行一次；自定义安装位置以真实位置为准：
 
 ```sh
-python3 scripts/extension_release.py --source assets/companion/extension
-python3 scripts/companion.py --skill-root "$PWD" start
+python3 install_cloud_update.py
 ```
 
-第一条将完整扩展发布到本机桌面的 `KK漫剧-LibTV扩展` 固定目录，并登记文件指纹；后续继续使用同一加载目录。第二条启动 `127.0.0.1:18765` 本机服务，复用同版本同实例服务，不覆盖其他实例。运行环境按现有脚本要求准备 Python 3.10+；媒体检查/预览另需 ffmpeg、ffprobe。当前本机服务采用 macOS/Linux 的文件锁，Windows 原生运行尚未验证，不承诺通用安装成功。
+安装器登记原状态目录和固定扩展加载目录，备份原 Skill 启动入口，并启动 `127.0.0.1:18765` 托管服务。自定义位置用 `--skill-root`、`--state-dir`、`--extension-dir` 指定原目录，不更换扩展路径或重新创建数据库。0.8.1 及更早用户先保存编辑、等待制作与剪辑结束，再核对并停止原本机服务后迁移一次；不删除原扩展或配对。已托管者沿用现有 `scripts/companion.py start` 启动入口，无需重复安装。
+
+托管服务运行时约每 5 分钟从固定 kelao HTTPS 来源检查、下载和校验新版，空闲后自动切换；新程序启动失败退回上一程序版本，不还原用户数据库。浏览器未保存编辑仍暂缓重载。电脑休眠或服务停止期间不检查，恢复运行后继续。Python 3.10+、ffmpeg / ffprobe 等依赖沿用原要求；当前 macOS 链路已验证，Windows 原生运行尚未验证。
 
 在 Chrome 打开 `chrome://extensions/`，启用“开发者模式”，选择“加载已解压的扩展程序”，选择上述固定目录。它直接包含 `manifest.json`，不要选择 ZIP 或上层目录。当前使用本机开发者模式加载，GitHub 下载不等于 Chrome 扩展商店安装。
 
@@ -62,4 +63,4 @@ python3 scripts/companion.py --skill-root "$PWD" start
 
 需要在面板同步时，使用“同步 LibTV”并检查真实返回。连接检查只读，不创建测试节点、不试投生成、不用付费任务探测能力。未连接项显示具体原因，修复该项后再检查，不重复重装全部组件。已有未知任务沿原任务身份恢复。
 
-两款插件与所需连接就绪后，恢复当前项目的剧本、素材与回执，按制作流程推进。文字设计可在连接补齐前继续；依赖浏览器或 LibTV 的制作步骤等待对应连接。安装完成、可读取项目、允许生成、实际生成成功和用户采用分别记录。
+两款插件与所需连接就绪后，恢复当前项目的剧本、决定、素材与回执，按制作流程推进，不重新询问已确定方向。文字设计可在连接补齐前继续；依赖浏览器或 LibTV 的制作步骤等待对应连接。安装完成、可读取项目、允许生成、实际生成成功和用户采用分别记录。

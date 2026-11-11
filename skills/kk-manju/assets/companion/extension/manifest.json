@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "KK 漫剧 · LibTV 制作伴随面板",
   "description": "看片式漫剧制作面板：选集、分镜播放、候选比较与采用记录。",
-  "version": "0.6.0",
+  "version": "0.8.1",
   "permissions": [
     "storage",
     "scripting"

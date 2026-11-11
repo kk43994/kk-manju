@@ -1,1 +1,1 @@
-var KK_BUILD = Object.freeze({"schema": 1, "version": "0.6.0", "buildId": "c22cdad5c0a3cdea1e646506a27b60bdb69415d742f4fdb5feb062bf60f070b6"});
+var KK_BUILD = Object.freeze({"schema": 1, "version": "0.8.1", "buildId": "f26268104e746fcca449b808281da42da6271f19070a7e07a9a6ea6ab96c3171"});
