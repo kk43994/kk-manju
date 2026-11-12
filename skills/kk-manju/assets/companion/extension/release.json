@@ -1,21 +1,22 @@
 {
-  "buildId": "f26268104e746fcca449b808281da42da6271f19070a7e07a9a6ea6ab96c3171",
+  "buildId": "d71f83121887ec67b3a13cf8b44268c44e8e40f56a77c2933f2e90cb6abf60c4",
   "files": {
     "adapter.js": "82eedce2c7ba8ea82b66d4b067ada5c2125bfdf84b8a51d0a3e3cb1f65d1525a",
-    "background.js": "4f471f05877c46a088c69c09216651ce0b699809d45820b5c4b4af5895a320b3",
-    "build-info.js": "f6b5998a55bcad70642f088d09017626539fa97666705db7279332a3d0c3c08e",
-    "content.js": "8d5f4d6aa082f013a8a1d91f6ce883416bb1a62ba211699e97bcd44fc7025bed",
+    "background.js": "3d16142dfb0f52d2b97bdfaebd6703621d48f70a40e87fb996dd5f17d7d77ed4",
+    "build-info.js": "fae694563fd691fe69ac90938df44e18051ab8f7f8dd32d494adc1a6649fabf0",
+    "content.js": "509c8f21ddd9335d725a7d1c7c2f4d648772d2e70469df53b108178a2ade55aa",
     "logo.svg": "62866ca67b743b740d6ef6e60dc869e44d7460b55b6cabb04e7afbf04ce78e6f",
-    "manifest.json": "1880f24a8754cc68fae70161f89a1faeb4b05d4ff7ba9a39265f13ba94daf1ef",
+    "manifest.json": "341750f7dfbf83d78b838d4e4bf68510df946b69a133844cd6fdc0d919c5f0f1",
     "options.css": "407c5e3a9c6efe0ab87230c8fc2ae293ac312c2a398440a9040d15e964e44fc4",
-    "options.html": "aa7a36f3cbf73f7026dfd5847732cdb10c0ca8e93736ae1ace724a2649191be4",
-    "options.js": "d9a339532f1088deaec16ba9a58d5a00446c4643383c251ee01e1aa7550ea848",
-    "production.css": "95dfe9c5fa3ad01f36b49118b79fffe634ee931d9afe2bcbbd4e0b7344df0ecb",
-    "production.html": "7142df700b0e12149182563de35e902e0a343cb2ce3157bddad3a763cca8602b",
-    "production.js": "b17b840854932578505897e7e817d028282d11f92e3c10a17b4f881cc38211c7",
-    "updater.js": "a83de208bb66e59d5b8c4fa8402f9d635119e3c146ea2a75a58946fa1cdd67bc"
+    "options.html": "efa4024c5070015fd3f3a3e2b25caf94ddda17770b389fc30119e9fed4d88fd7",
+    "options.js": "0224d93ae35b5c6d9d6e10a3424094e1e99c3745c3fdc913cc84b56cc0fc7be5",
+    "panels.js": "afefe64070de81a03eacfb473666a5b932a07a66d8e13e9e85677aaba9dac242",
+    "production.css": "101fd57d698b9563b1987683b5a6f14ca3eafa944b9cc604ed2b3e08a0bd37f4",
+    "production.html": "2c3943b3e69ca98bb1fa4e84b052f16dbc1436b466815a1a5583d90caaaca7c5",
+    "production.js": "98bbbe05ae3a6b7a5965ecd642f59ca61f8d7efe1c34b7abd2612f550bb2562a",
+    "updater.js": "3fc85dc3082ef677a467f67110e0053c6909cac28091385634a147e6bdececaa"
   },
-  "publishedAt": "2026-11-09T21:45:18.812703+00:00",
+  "publishedAt": "2026-11-11T00:31:27.920453+00:00",
   "schema": 1,
-  "version": "0.8.1"
+  "version": "0.10.0"
 }

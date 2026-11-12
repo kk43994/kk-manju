@@ -2,10 +2,11 @@
   "manifest_version": 3,
   "name": "KK 漫剧 · LibTV 制作伴随面板",
   "description": "看片式漫剧制作面板：选集、分镜播放、候选比较与采用记录。",
-  "version": "0.8.1",
+  "version": "0.10.0",
   "permissions": [
     "storage",
-    "scripting"
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
     "http://127.0.0.1:18765/*",
@@ -31,16 +32,12 @@
   ],
   "options_page": "options.html",
   "action": {
-    "default_title": "KK 漫剧 · 连接设置",
-    "default_popup": "options.html"
+    "default_title": "KK 漫剧 · 打开制作侧栏"
   },
   "web_accessible_resources": [
     {
       "resources": [
-        "logo.svg",
-        "production.html",
-        "production.css",
-        "production.js"
+        "logo.svg"
       ],
       "matches": [
         "https://www.liblib.tv/*",
@@ -50,5 +47,9 @@
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://127.0.0.1:18765; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'"
+  },
+  "minimum_chrome_version": "116",
+  "side_panel": {
+    "default_path": "production.html?panel=1&view=progress"
   }
 }
